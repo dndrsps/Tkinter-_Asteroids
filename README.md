@@ -11,3 +11,4 @@ press 'w' or 'up-arrow' to accelerate;
       'space' to shoot;
       'p' to pause.
 
+![scrsht_tkinter-asteroids](https://user-images.githubusercontent.com/32409612/202722237-095cb76d-bc90-4baa-9d66-743f6b7422c4.png)
