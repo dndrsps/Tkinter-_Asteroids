@@ -42,6 +42,7 @@ class Game:
 
     def refresh_asteroids(self) -> None:
         for asteroid in self.asteroids:
+            self.detect_collision(asteroid)
             asteroid.update()
             if asteroid.is_to_dispose:
                 self.asteroids.remove(asteroid)
@@ -51,12 +52,6 @@ class Game:
     def refresh_missles(self):
         for missle in self.missles:
             missle.update()
-            for asteroid in self.asteroids:
-                if asteroid.is_collide_with(missle) and not missle.is_to_dispose:
-                    missle.is_to_dispose = True
-                    self.asteroids += asteroid.destroy()
-                    self.score += 1
-                    self.animations.append(ExplosionAnimation(asteroid.center, 50))
             if missle.is_to_dispose:
                 self.missles.remove(missle)
             else:
@@ -72,7 +67,6 @@ class Game:
         if self.is_turning_right:
             self.player.rotate(-TURNING_RATE)
         self.player.update()
-        self.detect_collisions(self.player)
         self.player.draw(self.canvas)
     
     def refresh_animations(self):
@@ -80,6 +74,15 @@ class Game:
             if animation.is_disposable:
                 self.animations.remove(animation)
             animation.play(self.canvas)
+            
+    def detect_collision(self, asteroid: Asteroid) -> None:
+        '''Detect collision with Player or missles'''
+        if asteroid.is_collide_with(self.player):
+            self.player_collision(asteroid)
+            return
+        for missle in self.missles:
+            if asteroid.is_collide_with(missle):
+                self.missle_collision(missle, asteroid)  
 
     def level_controller(self) -> None:
         if self.is_new_wave:
@@ -101,20 +104,8 @@ class Game:
             position = random_vector(0, WIDTH, 0, HEIGHT)
         return position
 
-    #Refactoring neded!
-    def detect_collisions(self, obj):
-        for asteroid in self.asteroids:
-            if not asteroid.is_collide_with(obj):
-                continue
-            if isinstance(obj, Missle):
-                self.missle_collision(obj, asteroid)
-                continue
-            if isinstance(obj, Player):
-                self.player_collision(asteroid)
-                continue
-
-    #Refactoring needed!
     def player_collision(self, asteroid: Asteroid) -> None:
+        '''Handles the asteroid's collision with the Player'''
         if self.player.is_invincible:
             return
         self.asteroids += asteroid.destroy()
@@ -123,11 +114,13 @@ class Game:
         self.animations.append(ExplosionAnimation(asteroid.center, 50))
 
     def missle_collision(self, missle: Missle, asteroid: Asteroid) -> None:
-        if not missle.is_disposable:
-            missle.is_disposable = True
-            self.asteroidss += asteroid.destroy()
-            self.score += 1
-            self.animations.append(ExplosionAnimation(asteroid.center, 40))
+        '''Handles the asteroid's collision with a missle'''
+        if missle.is_to_dispose:
+            return
+        missle.is_to_dispose = True
+        self.asteroids += asteroid.destroy()
+        self.score += 1
+        self.animations.append(ExplosionAnimation(asteroid.center, 50))
 
     def refresh_HUD(self):
         self.canvas.create_text(FONT_SIZE*4, FONT_SIZE+2, 
