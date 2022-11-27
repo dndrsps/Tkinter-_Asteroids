@@ -156,7 +156,8 @@ class Game:
         self.score += 1
         self.animations.append(ExplosionAnimation(asteroid.center, 50))
 
-    def update_HUD(self):
+    def update_HUD(self) -> None:
+        """Displays and updates text of levels, scores and lives count on the screen"""
         self.canvas.create_text(FONT_SIZE*4, FONT_SIZE+2, 
             text=f"LEVEL: {self.levels}", 
             fill=TEXT_COLOR, font=(FONT, FONT_SIZE, FONT_STYLE))
@@ -190,26 +191,12 @@ class Game:
         if self.is_debug_on:
             self.draw_debug_overlay()
 
-    def draw_debug_overlay(self):
+    def draw_debug_overlay(self) -> None:
+        """Displays and updates text of FPS count 
+        (and maybe later other informations) on the screen"""
         obj_count = len(self.asteroids) + len(self.missles) + len(self.animations)
         self.canvas.create_text(FONT_SIZE*4, HEIGHT-(FONT_SIZE+2), 
             text=f"FPS: {self.get_FPS()}", 
-            fill=TEXT_COLOR, font=(FONT, FONT_SIZE, FONT_STYLE))
-        
-        self.canvas.create_text(FONT_SIZE*5, (FONT_SIZE+2)+20, 
-            text=f"AST_COUNT: {len(self.asteroids)}", 
-            fill=TEXT_COLOR, font=(FONT, FONT_SIZE, FONT_STYLE))
-        
-        self.canvas.create_text(FONT_SIZE*5, (FONT_SIZE+2)+40, 
-            text=f"MIS_COUNT: {len(self.missles)}", 
-            fill=TEXT_COLOR, font=(FONT, FONT_SIZE, FONT_STYLE))
-        
-        self.canvas.create_text(FONT_SIZE*5, (FONT_SIZE+2)+60, 
-            text=f"ANI_COUNT: {len(self.animations)}", 
-            fill=TEXT_COLOR, font=(FONT, FONT_SIZE, FONT_STYLE))
-        
-        self.canvas.create_text(FONT_SIZE*5, (FONT_SIZE+2)+80, 
-            text=f"OBJ_COUNT: {obj_count}", 
             fill=TEXT_COLOR, font=(FONT, FONT_SIZE, FONT_STYLE))
 
     def shoot(self) -> None:
@@ -218,6 +205,7 @@ class Game:
             self.missles.append(new_missle)
       
     def pause(self) -> None:
+        """Pauses or upauses the game"""
         if self.is_game_over:
             return
         if self.is_paused:
@@ -227,6 +215,7 @@ class Game:
             self.is_paused = True
     
     def start_new_game(self):
+        """Restarts the game"""
         if not self.is_game_over:
             return
         self.is_game_over = False
