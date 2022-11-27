@@ -3,10 +3,12 @@ from model import Vector2D, random_num, random_vector
 from enum import Enum
 from config import*
 
+
 class AsteroidType(Enum):
     WHOLE = 'whole'
     HALF = 'half'
     QUARTER = 'quarter'
+
 
 class SpaceObject:
     '''Base class for all space objects'''
@@ -15,7 +17,7 @@ class SpaceObject:
         self.center = position
         self.shape = []
         self.border_points = []
-        self.speed = Vector2D(0, 0)
+        self.speed = Vector2D.zero_vector()
         self.heading = 0
         self.init_shape()
         self.update_border_points()
@@ -53,14 +55,14 @@ class SpaceObject:
     def is_disposable(self) -> bool:
         return False
 
+
 class Player(SpaceObject):
     '''Spaceship of the player'''
     def __init__(self, position: Vector2D, size: int):
         self.exhaust_shape = []
         super().__init__(position, size)
-        #self.acceleration = Vector2D(0, -ACCELERATION).rotate(self.heading, Vector2D(0, 0))
         self.reload_timer = RELOAD_RATE
-        self.invincible_timer = 20
+        self.invincible_timer = 40
         self.is_accelerating = False
         self.is_invincible = False
         self.color = PLAYER_COLOR
@@ -106,13 +108,13 @@ class Player(SpaceObject):
             self.is_accelerating = False
         if self.is_invincible:
             #blinking when its invincible
-            if self.animation_timer%2 == 0:
+            if (self.animation_timer//2) % 4 == 0:
                 super().draw(canvas)
         else:
             super().draw(canvas)
 
     def update_acceleration(self) -> None:
-        self.acceleration = Vector2D(0, -ACCELERATION).rotate(self.heading, Vector2D(0, 0))
+        self.acceleration = Vector2D(0, -ACCELERATION).rotate(self.heading, Vector2D.zero_vector())
 
     def accelerate(self) -> None:
         self.update_acceleration()
@@ -144,13 +146,14 @@ class Player(SpaceObject):
         self.is_invincible = True
         self.invincible_timer = 60
 
+
 class Missle(SpaceObject):
     '''Missle shot by the player. Destroys asteroids'''
     def __init__(self, position: Vector2D, heading: int, initial_speed: Vector2D, size: int):
 
         super().__init__(position, size)
         self.heading = heading
-        self.speed = Vector2D(0, -MISSLE_SPEED).rotate(self.heading, Vector2D(0, 0)) + initial_speed
+        self.speed = Vector2D(0, -MISSLE_SPEED).rotate(self.heading, Vector2D.zero_vector()) + initial_speed
 
     def init_shape(self) -> None:
 
@@ -164,7 +167,7 @@ class Missle(SpaceObject):
         
          self.center += self.speed
          self.update_border_points()
-         self.disposable = self.is_disposable()
+         self.is_to_dispose = self.is_disposable()
 
     def is_outside_window(self):
 
@@ -178,21 +181,21 @@ class Missle(SpaceObject):
         
         return self.is_outside_window()
 
+
 class Asteroid(SpaceObject):
     '''Asteroids to be destroyed'''
     def __init__(self, position: Vector2D, size: int, type: AsteroidType) -> None:
         self.type = type
         super().__init__(position, size)
-        self.spin_speed = random_num(5)
-        #self.speed = Vector2D(0, -2).rotate(random_num(180), Vector2D(0,0))
+        self.spin_speed = random_num(3)
         self.destroyed = False
         match self.type:
             case AsteroidType.WHOLE:
-                self.speed = Vector2D(0, ASTEROID_SPEED).rotate(random_num(180), Vector2D(0,0))
+                self.speed = Vector2D(0, ASTEROID_SPEED).rotate(random_num(180), Vector2D.zero_vector())
             case AsteroidType.HALF:
-                self.speed = Vector2D(0, ASTEROID_SPEED*2).rotate(random_num(180), Vector2D(0,0))
+                self.speed = Vector2D(0, ASTEROID_SPEED*2).rotate(random_num(180), Vector2D.zero_vector())
             case AsteroidType.QUARTER:
-                self.speed = Vector2D(0, ASTEROID_SPEED*3).rotate(random_num(180), Vector2D(0,0))
+                self.speed = Vector2D(0, ASTEROID_SPEED*3).rotate(random_num(180), Vector2D.zero_vector())
 
     def init_shape(self) -> None: 
         self.shape.append( Vector2D(0, -self.size//2 + random_num(self.size//4) ) ) #A
@@ -248,14 +251,50 @@ class Asteroid(SpaceObject):
 
     def is_disposable(self) -> bool:
         return self.destroyed
+
+
+class HealthPickUp(SpaceObject):
+    """Helth pick-up object, dropped by destroyed asteroids"""
+    def __init__(self, position, size) -> None:
+
+        super().__init__(position, size)
+        self.spin_speed = 5
+        self.color = "red"
+        self.duration = 350
+
+    def init_shape(self) -> None: 
+        self.shape.append(Vector2D(0, -self.size//2))
+        self.shape.append(Vector2D(self.size//2, 0))
+        self.shape.append(Vector2D(0, self.size//2))
+        self.shape.append(Vector2D(-self.size//2, 0))
+
+
+    def update(self) -> None:
+        self.heading += self.spin_speed
+        return super().update()
+
+    def is_disposable(self):
+        self.duration -= 1
+        if self.duration < 1:
+            self.is_to_dispose = True
+        return self.is_to_dispose
+
+    def is_collide_with(self, player: "Player") -> bool:
+        if self.center.distance(player.center) <= self.size:
+            return True
+        for point in player.border_points:
+            if self.center.distance(point) <= self.size:
+                return True
+        return False
+    
         
 class Spark:
     '''Randomly flying pixel for explosion animation'''
-    def __init__(self, position: Vector2D) -> None:
+    def __init__(self, position: Vector2D, color = DRAW_COLOR) -> None:
 
         self.position = position
-        self.speed = random_vector(-5, 5, -5, 5)
-        self.color = DRAW_COLOR
+        self.speed = random_vector(0, 0, 1, 5).rotate(random_num(180), Vector2D.zero_vector())
+        self.color = color
     
     def draw(self, canvas: tk.Canvas) -> None:
         canvas.create_rectangle(self.position.x-1,
@@ -267,12 +306,13 @@ class Spark:
         self.position += self.speed
         self.draw(canvas)
 
+
 class ExplosionAnimation:
 
     def __init__(self, position: Vector2D, duration: int) -> None:
         
         self.position = position
-        self.sparks = [Spark(self.position) for i in range(50)]
+        self.sparks = [Spark(self.position) for i in range(40)]
         self.duration = duration
         self.is_disposable = False
     
@@ -282,5 +322,29 @@ class ExplosionAnimation:
             return
         for spark in self.sparks:
             spark.update(canvas)
+        self.duration -= 1
+
+
+class TextAnimation:
+
+    def __init__(self, position: Vector2D, duration: int, text: str, size: int = FONT_SIZE, color = TEXT_COLOR) -> None:
+        self.position = position
+        self.text = text
+        self.size = size
+        self.total_duration = duration
+        self.duration = duration
+        self.is_disposable = False
+        self.color = color
+    
+    def play(self, canvas: tk.Canvas):
+        if self.total_duration == self.duration:    # the animation not displayed in the first frame
+            self.duration -= 1
+            return
+        if self.duration < 1:
+            self.is_disposable = True
+            return
+        canvas.create_text(self.position.x, self.position.y, 
+            text=self.text, 
+            fill=self.color, font=(FONT, self.size, FONT_STYLE))
         self.duration -= 1
         
