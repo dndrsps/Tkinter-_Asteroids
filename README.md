@@ -1,5 +1,5 @@
 # Tkinter_Asteroids
-Asteroids game game implemented in Python using the tkinter module.
+Asteroids game implemented in Python using the tkinter module.
 Python 3.10 is required.
 Only built-in modules were used.
 
