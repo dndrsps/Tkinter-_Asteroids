@@ -1,14 +1,12 @@
 # Tkinter_Asteroids
-Asteroids game implemented in Python using the tkinter module.
+Asteroids game game implemented in Python using the tkinter module.
 Python 3.10 is required.
 Only built-in modules were used.
 
 Run the main.py to start the game.
-Controls: 
-press 'w' or 'up-arrow' to accelerate;
-      'a' or 'left-arrow' to turn left;
-      'd' or 'right-arrow' to turn right;
-      'space' to shoot;
-      'p' to pause.
 
-![scrsht_tkinter-asteroids](https://user-images.githubusercontent.com/32409612/202722237-095cb76d-bc90-4baa-9d66-743f6b7422c4.png)
+
+![ast_main-menu](https://user-images.githubusercontent.com/32409612/205499502-389ea99f-ed42-4b22-8cf3-96dd6e09ece1.png)
+![ast_game](https://user-images.githubusercontent.com/32409612/205499505-7de33597-eb38-4a21-ad17-2961bf89503d.png)
+![ast_end-menu](https://user-images.githubusercontent.com/32409612/205499508-064c62d7-41d6-4b8d-b7d9-c12dc0ead5e4.png)
+![ast_highscores](https://user-images.githubusercontent.com/32409612/205499509-75cc8c45-8dcb-408a-995f-14d398275aa1.png)
