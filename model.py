@@ -3,7 +3,8 @@ import random
 
 
 class Vector2D:
-
+    """2 dimesional Vector object to represent position but also speed and acceleration
+    as well"""
     def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
@@ -16,8 +17,7 @@ class Vector2D:
                       self.y + other.y)
 
     def __sub__(self, other: "Vector2D") -> "Vector2D":
-        return Vector2D(self.x - other.x,
-                      self.y - other.y)
+        return Vector2D(self.x-other.x, self.y-other.y)
 
     def __abs__(self) -> float:
         return math.sqrt(self.x**2 + self.y**2)
@@ -41,26 +41,28 @@ class Vector2D:
     @classmethod
     def zero_vector(cls) -> "Vector2D":
         return Vector2D(0, 0)
+    
+    @classmethod
+    def get_midpoint(cls, start_point: "Vector2D", end_point: "Vector2D") -> "Vector2D":
+        return Vector2D((start_point.x+end_point.x)/2,
+                        (start_point.y+end_point.y)/2)
 
 
 def random_vector(min_x: int, max_x: int, min_y: int, max_y: int) -> Vector2D:
-
     x = random.randint(min_x, max_x)
     y = random.randint(min_y, max_y)
-
     return Vector2D(x, y)
 
 
 def random_num(range_num: int) -> int:
-
+    """Returns a random int between +/-[range_num]"""
     return random.randint(-range_num, range_num)
 
 
 def random_bool(chance: int) -> bool:
-    """Returns True in 1 in [chance] occasion"""
+    """Returns True in 1 in [chance] occasions.
+    For e.g. [chance] = 20: returns True with 1/20 (5%) chance,
+    else  returns False"""
     return random.randint(1, chance) == 1
     
-
-
-
 

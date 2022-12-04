@@ -68,6 +68,7 @@ class Player(SpaceObject):
         self.color = PLAYER_COLOR
         self.animation_timer = 0
         self.update_acceleration()
+        self.is_destroyed = False
         
     def init_shape(self) -> None:
         A = Vector2D(0, -self.size)
@@ -103,6 +104,8 @@ class Player(SpaceObject):
             width=2, fill=DRAW_COLOR)
 
     def draw(self, canvas: tk.Canvas):
+        if self.is_destroyed:
+            return
         if self.is_accelerating:
             self.draw_exhaust(canvas)
             self.is_accelerating = False
@@ -132,6 +135,8 @@ class Player(SpaceObject):
         super().update()
 
     def can_shoot(self) -> bool:
+        if self.is_destroyed:
+            return False
         return self.reload_timer < 0
 
     def shoot(self) -> "Missle":
@@ -307,12 +312,32 @@ class Spark:
         self.draw(canvas)
 
 
-class ExplosionAnimation:
+class SpinningLine:
+    """Randomly flying and spinnig line segment to animate player's spaceship explosion"""
+    def __init__(self, start_point: Vector2D, end_point: Vector2D, color = DRAW_COLOR) -> None:
+        self.start_point = start_point
+        self.end_point = end_point
+        self.speed = Vector2D(0, 0.5).rotate(random_num(180), Vector2D.zero_vector())
+        self.color = color
+        self.spin_degree = random_num(5)
 
-    def __init__(self, position: Vector2D, duration: int) -> None:
+    def draw(self, canvas: tk.Canvas) -> None:
+        canvas.create_line(self.start_point.x, self.start_point.y,
+                            self.end_point.x, self.end_point.y,
+                            fill=self.color)
+    
+    def update(self, canvas: tk.Canvas) -> None:
+        midpoint = Vector2D.get_midpoint(self.start_point, self.end_point) + self.speed
+        self.start_point = (self.start_point+self.speed).rotate(self.spin_degree, midpoint)
+        self.end_point = (self.end_point+self.speed).rotate(self.spin_degree, midpoint)
+        self.draw(canvas)
+
+
+class ExplosionAnimation:
+    def __init__(self, position: Vector2D, duration: int, color=DRAW_COLOR) -> None:
         
         self.position = position
-        self.sparks = [Spark(self.position) for i in range(40)]
+        self.sparks = [Spark(self.position, color) for i in range(40)]
         self.duration = duration
         self.is_disposable = False
     
@@ -325,8 +350,28 @@ class ExplosionAnimation:
         self.duration -= 1
 
 
-class TextAnimation:
+class PlayerExplosionAnimation:
+    def __init__(self, player: Player, duration_frames: int) -> None:
+        self.init_segments(player)
+        self.duration_frames = duration_frames
+        self.is_disposable = False
 
+    def init_segments(self, player: Player) -> None:
+        self.segments = []
+        self.segments.append(SpinningLine(player.border_points[0], player.border_points[1], player.color))
+        self.segments.append(SpinningLine(player.border_points[1], player.border_points[2], player.color))
+        self.segments.append(SpinningLine(player.border_points[2], player.border_points[0], player.color))
+
+    def play(self, canvas: tk.Canvas) -> None:
+        if self.duration_frames < 1:
+            self.is_disposable = True
+            return
+        for segment in self.segments:
+            segment.update(canvas)
+        self.duration_frames -= 1
+
+
+class TextAnimation:
     def __init__(self, position: Vector2D, duration: int, text: str, size: int = FONT_SIZE, color = TEXT_COLOR) -> None:
         self.position = position
         self.text = text
@@ -335,7 +380,6 @@ class TextAnimation:
         self.duration = duration
         self.is_disposable = False
         self.color = color
-    
     def play(self, canvas: tk.Canvas):
         if self.total_duration == self.duration:    # the animation not displayed in the first frame
             self.duration -= 1
@@ -347,4 +391,5 @@ class TextAnimation:
             text=self.text, 
             fill=self.color, font=(FONT, self.size, FONT_STYLE))
         self.duration -= 1
+        
         

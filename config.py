@@ -16,22 +16,23 @@ TEXT_COLOR = "green"
 
 #Game settings:
 REFRESH_RATE = 10       # ms
-RELOAD_RATE = 12         # Frames/reload
+RELOAD_RATE = 20         # Frames/reload
 MISSLE_SPEED = 4        # Pixels/frame
 PLAYER_SIZE = 15        # Apprx. size in pixels
 ASTEROID_SIZE = 40      # Apprx. size in pixels
 ASTEROID_SPEED = 0.4      # Pixels/frame
 START_LIVES = 3
 START_LEVEL = 0
-TURNING_RATE = 5        # Degrees/Frame
+TURNING_RATE = 4        # Degrees/Frame
 ACCELERATION = 0.05     # Pixel/Frame^2
+HEALTH_DROP_FREQ = 15
 
 #Other:
 INSTRUCTIONS = ("press <P> to START/PAUSE/UNPAUSE\n"
-                +"press <W> or UP to ACCELERATE\n"
-                +"press <A> or LEFT tor TURN LEFT\n"
-                +"press <D> or RIGHT tor TURN RIGHT\n"
-                +"press SPACE to SHOOT")
+                +"press <W> or <UP> to ACCELERATE\n"
+                +"press <A> or <LEFT> tor TURN LEFT\n"
+                +"press <D> or <RIGHT> tor TURN RIGHT\n"
+                +"press <SPACE> to SHOOT")
 
 
 
